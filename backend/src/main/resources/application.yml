@@ -1,0 +1,67 @@
+# All secrets come from environment variables - nothing secret has a default value here.
+# Local: copy .env.example to .env (docker compose reads it). Render: set in render.yaml / dashboard.
+spring:
+  application:
+    name: foodrescue
+  datasource:
+    # Either DB_URL (full JDBC URL) or DB_HOST / DB_PORT / DB_NAME (what Render provides)
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:foodrescue}}
+    username: ${DB_USER:foodrescue}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none          # the schema is owned by Flyway migrations
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${PORT:8080}           # Render injects PORT
+  forward-headers-strategy: framework
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: foodrescue
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  info:
+    env:
+      enabled: true
+info:
+  app:
+    name: FoodRescue
+    description: Surplus food redistribution coordinator
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}      # at least 32 characters; the app refuses to start with a shorter one
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+  cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  admin:
+    email: ${ADMIN_EMAIL:admin@foodrescue.local}
+    password: ${ADMIN_PASSWORD:}      # blank = do not create a bootstrap admin
+    full-name: ${ADMIN_NAME:System Admin}
+  expiry:
+    initial-delay-ms: ${EXPIRY_INITIAL_DELAY_MS:30000}
+    check-interval-ms: ${EXPIRY_CHECK_INTERVAL_MS:60000}
+    warning-hours: ${EXPIRY_WARNING_HOURS:2}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

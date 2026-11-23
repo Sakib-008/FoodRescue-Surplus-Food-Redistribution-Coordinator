@@ -1,0 +1,61 @@
+# docker compose up --build          -> app on http://localhost:8080 (+ PostgreSQL)
+# docker compose --profile monitoring up --build   -> also Prometheus (:9090) and Grafana (:3000)
+# All credentials come from .env (copy .env.example). Nothing is hard-coded here.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-foodrescue}
+      POSTGRES_USER: ${POSTGRES_USER:-foodrescue}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-foodrescue}
+      DB_USER: ${POSTGRES_USER:-foodrescue}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET (32+ characters) in .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@foodrescue.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    profiles: [monitoring]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    profiles: [monitoring]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
+    volumes:
+      - ./monitoring/grafana:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
