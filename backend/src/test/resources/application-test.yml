@@ -1,0 +1,16 @@
+# Test profile. The datasource values are placeholders: @ServiceConnection replaces them with the
+# Testcontainers PostgreSQL instance, and Flyway builds the real schema in it.
+spring:
+  datasource:
+    url: jdbc:postgresql://replaced-by-testcontainers/foodrescue
+    username: test
+    password: test
+app:
+  jwt:
+    secret: test-secret-test-secret-test-secret-test-secret
+  admin:
+    email: admin@test.local
+    password: AdminPass123
+  expiry:
+    initial-delay-ms: 3600000
+    check-interval-ms: 3600000
