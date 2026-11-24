@@ -1,0 +1,11 @@
+# build output
+backend/target/
+frontend/node_modules/
+frontend/dist/
+# local config & data (never commit secrets)
+.env
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
