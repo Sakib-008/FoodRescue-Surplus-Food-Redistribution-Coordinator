@@ -1,0 +1,72 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- design tokens ---------- */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* brand = a calm, food-fresh green */
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+
+  --shadow-card: 0 1px 2px rgb(16 24 20 / 0.04), 0 1px 3px rgb(16 24 20 / 0.06);
+  --shadow-pop: 0 10px 30px -8px rgb(16 24 20 / 0.25);
+  --animate-fade-in: fade-in 0.15s ease-out;
+  --animate-slide-in: slide-in 0.22s ease-out;
+  --animate-slide-left: slide-left 0.22s ease-out;
+  --animate-pop: pop 0.15s ease-out;
+  @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes slide-in { from { transform: translateX(100%) } to { transform: translateX(0) } }
+  @keyframes slide-left { from { transform: translateX(-100%) } to { transform: translateX(0) } }
+  @keyframes pop { from { opacity: 0; transform: scale(0.96) } to { opacity: 1; transform: scale(1) } }
+}
+
+/* semantic surface colours: swapped as a set in dark mode */
+:root {
+  --c-canvas: #f6f8f6;
+  --c-surface: #ffffff;
+  --c-subtle: #eff3ef;
+  --c-line: #e1e7e1;
+  --c-ink: #0f1a14;
+  --c-muted: #5b6a61;
+}
+.dark {
+  --c-canvas: #0c1310;
+  --c-surface: #131c18;
+  --c-subtle: #1a2520;
+  --c-line: #263430;
+  --c-ink: #e9f0ea;
+  --c-muted: #93a49a;
+}
+@theme inline {
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-subtle: var(--c-subtle);
+  --color-line: var(--c-line);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+}
+
+@layer base {
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+  body { @apply bg-canvas font-sans text-ink antialiased; }
+  ::selection { background: var(--color-brand-200); color: #052e22; }
+  h1, h2, h3 { letter-spacing: -0.015em; }
+  button, [role="button"], select { cursor: pointer; }
+  input[type="number"]::-webkit-inner-spin-button { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
